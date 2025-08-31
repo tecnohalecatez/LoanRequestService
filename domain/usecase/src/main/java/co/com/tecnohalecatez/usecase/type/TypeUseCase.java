@@ -9,7 +9,7 @@ public class TypeUseCase {
 
     private final TypeRepository typeRepository;
 
-    Mono<Boolean> existsById(Integer id) {
+    public Mono<Boolean> existsById(Integer id) {
         return typeRepository.existsById(id);
     }
 

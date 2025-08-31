@@ -46,7 +46,6 @@ public class LoanHandler {
                                 }
                                 return loanUseCase.save(loanDTOMapper.toModel(loanDataDTO));
                             });
-
                 })
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)

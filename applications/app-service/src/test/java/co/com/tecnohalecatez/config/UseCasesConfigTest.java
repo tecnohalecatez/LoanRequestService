@@ -1,12 +1,14 @@
 package co.com.tecnohalecatez.config;
 
 import co.com.tecnohalecatez.model.loan.gateways.LoanRepository;
+import co.com.tecnohalecatez.model.type.gateways.TypeRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UseCasesConfigTest {
@@ -40,6 +42,11 @@ class UseCasesConfigTest {
         @Bean
         public LoanRepository loanRepository() {
             return Mockito.mock(LoanRepository.class);
+        }
+
+        @Bean
+        public TypeRepository typeRepository() {
+            return Mockito.mock(TypeRepository.class);
         }
     }
 

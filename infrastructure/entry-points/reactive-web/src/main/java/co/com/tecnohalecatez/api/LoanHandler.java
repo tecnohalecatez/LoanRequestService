@@ -7,6 +7,7 @@ import co.com.tecnohalecatez.api.dto.ErrorResponseDTO;
 import co.com.tecnohalecatez.api.exception.LoanDataException;
 import co.com.tecnohalecatez.api.mapper.LoanDTOMapper;
 import co.com.tecnohalecatez.usecase.loan.LoanUseCase;
+import co.com.tecnohalecatez.usecase.type.TypeUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import java.time.Instant;
 public class LoanHandler {
 
     private final LoanUseCase loanUseCase;
+    private final TypeUseCase typeUseCase;
     private final LoanDTOMapper loanDTOMapper;
     private final Validator validator;
 
@@ -37,7 +39,13 @@ public class LoanHandler {
                     if (errors.hasErrors()) {
                         return Mono.error(new LoanDataException(LoanConstant.INVALID_LOAN_DATA));
                     }
-                    return loanUseCase.save(loanDTOMapper.toModel(loanDataDTO));
+                    return typeUseCase.existsById(loanDataDTO.typeId())
+                            .flatMap(exists -> {
+                                if (Boolean.FALSE.equals(exists)) {
+                                    return Mono.error(new LoanDataException(LoanConstant.INVALID_LOAN_DATA));
+                                }
+                                return loanUseCase.saveLoan(loanDTOMapper.toModel(loanDataDTO));
+                            });
                 })
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)

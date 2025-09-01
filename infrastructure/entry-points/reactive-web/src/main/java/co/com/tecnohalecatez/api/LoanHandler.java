@@ -44,7 +44,7 @@ public class LoanHandler {
                                 if (Boolean.FALSE.equals(exists)) {
                                     return Mono.error(new LoanDataException(LoanConstant.INVALID_LOAN_DATA));
                                 }
-                                return loanUseCase.save(loanDTOMapper.toModel(loanDataDTO));
+                                return loanUseCase.saveLoan(loanDTOMapper.toModel(loanDataDTO));
                             });
                 })
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)

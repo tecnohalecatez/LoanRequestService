@@ -1,5 +1,6 @@
-package co.com.tecnohalecatez.r2dbc;
+package co.com.tecnohalecatez.usecase.type;
 
+import co.com.tecnohalecatez.model.type.gateways.TypeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,19 +12,19 @@ import reactor.test.StepVerifier;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TypeReactiveRepositoryAdapterTest {
-
-    @InjectMocks
-    TypeReactiveRepositoryAdapter repositoryAdapter;
+class TypeUseCaseTest {
 
     @Mock
-    TypeReactiveRepository repository;
+    private TypeRepository typeRepository;
+
+    @InjectMocks
+    private TypeUseCase typeUseCase;
 
     @Test
     void existsByIdShouldReturnTrue() {
-        when(repository.existsById(1)).thenReturn(Mono.just(true));
+        when(typeRepository.existsById(1)).thenReturn(Mono.just(true));
 
-        Mono<Boolean> result = repositoryAdapter.existsById(1);
+        Mono<Boolean> result = typeUseCase.existsById(1);
 
         StepVerifier.create(result)
                 .expectNext(true)

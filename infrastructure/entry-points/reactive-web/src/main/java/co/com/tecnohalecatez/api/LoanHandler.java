@@ -3,7 +3,6 @@ package co.com.tecnohalecatez.api;
 import co.com.tecnohalecatez.api.constant.LoanConstant;
 import co.com.tecnohalecatez.api.dto.LoanDTO;
 import co.com.tecnohalecatez.api.dto.LoanDataDTO;
-import co.com.tecnohalecatez.api.dto.ErrorResponseDTO;
 import co.com.tecnohalecatez.api.exception.LoanDataException;
 import co.com.tecnohalecatez.api.mapper.LoanDTOMapper;
 import co.com.tecnohalecatez.usecase.loan.LoanUseCase;
@@ -18,8 +17,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -49,28 +46,7 @@ public class LoanHandler {
                 })
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(loanDTOMapper.toResponse(savedLoan)))
-                .onErrorResume(LoanDataException.class, e -> {
-                    ErrorResponseDTO errorResponse = new ErrorResponseDTO(
-                            Instant.now().toString(),
-                            400,
-                            "Bad Request",
-                            e.getMessage()
-                    );
-                    return ServerResponse.badRequest()
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(errorResponse);
-                })
-                .onErrorResume(e -> {
-                    ErrorResponseDTO errorResponse = new ErrorResponseDTO(
-                            Instant.now().toString(),
-                            500,
-                            "Internal Server",
-                            e.getMessage()
-                    );
-                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(errorResponse);
-                });
+                        .bodyValue(loanDTOMapper.toResponse(savedLoan)));
     }
+    
 }

@@ -7,6 +7,7 @@ import co.com.tecnohalecatez.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
@@ -21,6 +22,7 @@ public class LoanReactiveRepositoryAdapter extends ReactiveAdapterOperations<Loa
     }
 
     @Override
+    @Transactional
     public Mono<Loan> save(Loan loan) {
         log.trace("Start save loan: {}", loan.toString());
         return super.save(loan)

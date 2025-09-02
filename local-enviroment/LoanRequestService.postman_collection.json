@@ -1,0 +1,39 @@
+{
+	"info": {
+		"_postman_id": "ab074ae0-9bcc-478e-bc79-b21ea652c640",
+		"name": "LoanRequestService",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13923056"
+	},
+	"item": [
+		{
+			"name": "SaveLoan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": 100,\n  \"term\": 12,\n  \"identityDocument\": \"1234567890\",\n  \"email\": \"prueba@test.com\",\n  \"typeId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:9090/api/v1/loans",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"v1",
+						"loans"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

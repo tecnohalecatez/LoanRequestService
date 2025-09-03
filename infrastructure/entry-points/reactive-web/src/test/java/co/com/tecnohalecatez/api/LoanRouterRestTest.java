@@ -24,7 +24,6 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {LoanRouterRest.class, LoanHandler.class, GlobalExceptionHandler.class})
@@ -88,12 +87,10 @@ class LoanRouterRestTest {
 
     @Test
     void listenSaveLoanReturnsCreated() {
-        doNothing().when(validator).validate(any(), any());
         when(typeUseCase.existsById(1)).thenReturn(Mono.just(true));
         when(loanDTOMapper.toModel(testLoanDataDTO)).thenReturn(testLoan);
         when(loanUseCase.saveLoan(any(Loan.class))).thenReturn(Mono.just(testLoan));
         when(loanDTOMapper.toResponse(testLoan)).thenReturn(testLoanDTO);
-
         webTestClient.post()
                 .uri(loans)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -101,6 +98,17 @@ class LoanRouterRestTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(LoanDTO.class);
+    }
+
+    @Test
+    void listenSaveLoanReturnsBadRequestWhenTypeNotExists() {
+        when(typeUseCase.existsById(1)).thenReturn(Mono.just(false));
+        webTestClient.post()
+                .uri(loans)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(testLoanDataDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
 }

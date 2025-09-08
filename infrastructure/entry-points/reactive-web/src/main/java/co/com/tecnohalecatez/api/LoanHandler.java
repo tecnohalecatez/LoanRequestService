@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Validator;
@@ -41,12 +43,19 @@ public class LoanHandler {
                                 if (Boolean.FALSE.equals(exists)) {
                                     return Mono.error(new LoanDataException(LoanConstant.INVALID_LOAN_DATA));
                                 }
-                                return loanUseCase.saveLoan(loanDTOMapper.toModel(loanDataDTO));
+                                return serverRequest.principal().cast(JwtAuthenticationToken.class)
+                                        .map(JwtAuthenticationToken::getToken).map(Jwt::getSubject)
+                                        .flatMap(email -> {
+                                            if (!email.equals(loanDataDTO.email())) {
+                                                return Mono.error(new LoanDataException(LoanConstant.INVALID_LOAN_DATA));
+                                            }
+                                            return loanUseCase.saveLoan(loanDTOMapper.toModel(loanDataDTO));
+                                        });
                             });
                 })
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(loanDTOMapper.toResponse(savedLoan)));
     }
-    
+
 }

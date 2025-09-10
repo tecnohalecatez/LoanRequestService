@@ -4,6 +4,7 @@ import co.com.tecnohalecatez.api.constant.LoanConstant;
 import co.com.tecnohalecatez.api.dto.LoanDTO;
 import co.com.tecnohalecatez.api.dto.LoanDataDTO;
 import co.com.tecnohalecatez.api.exception.LoanDataException;
+import co.com.tecnohalecatez.api.exception.LoanNotFoundException;
 import co.com.tecnohalecatez.api.mapper.LoanDTOMapper;
 import co.com.tecnohalecatez.usecase.loan.LoanUseCase;
 import co.com.tecnohalecatez.usecase.type.TypeUseCase;
@@ -56,6 +57,16 @@ public class LoanHandler {
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(loanDTOMapper.toResponse(savedLoan)));
+    }
+
+    public Mono<ServerResponse> listenGetLoansPage(ServerRequest serverRequest) {
+        return loanUseCase.getLoansByStateId(1)
+                .map(loanDTOMapper::toResponse)
+                .collectList()
+                .flatMap(loanList -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(loanList))
+                .switchIfEmpty(Mono.error(new LoanNotFoundException(LoanConstant.LOAN_NOT_FOUND)));
     }
 
 }

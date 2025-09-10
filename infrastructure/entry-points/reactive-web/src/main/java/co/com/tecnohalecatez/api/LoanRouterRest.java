@@ -5,6 +5,7 @@ import co.com.tecnohalecatez.api.constant.LoanConstant;
 import co.com.tecnohalecatez.api.dto.ErrorResponseDTO;
 import co.com.tecnohalecatez.api.dto.LoanDTO;
 import co.com.tecnohalecatez.api.dto.LoanDataDTO;
+import co.com.tecnohalecatez.api.exception.GlobalExceptionHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -75,7 +77,8 @@ public class LoanRouterRest {
                     )
             )
     })
-    public RouterFunction<ServerResponse> routerFunction(LoanHandler loanHandler, LoanPath loadPath) {
-        return route(POST(loadPath.getLoans()), loanHandler::listenSaveLoan);
+    public RouterFunction<ServerResponse> routerFunction(LoanHandler loanHandler, LoanPath loadPath, GlobalExceptionHandler globalExceptionHandler) {
+        return route(POST(loadPath.getLoans()), loanHandler::listenSaveLoan)
+                .andRoute(GET(loadPath.getLoans()), loanHandler::listenGetLoansPage);
     }
 }

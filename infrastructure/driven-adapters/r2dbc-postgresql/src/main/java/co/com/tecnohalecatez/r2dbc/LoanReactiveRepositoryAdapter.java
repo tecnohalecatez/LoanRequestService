@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
@@ -28,6 +29,15 @@ public class LoanReactiveRepositoryAdapter extends ReactiveAdapterOperations<Loa
         return super.save(loan)
                 .doOnSuccess(u -> log.trace("Loan saved: {}", u.toString()))
                 .doOnError(e -> log.error("Error saving loan: {}", e.getMessage()));
+    }
+
+    @Override
+    public Flux<Loan> findByStateId(Integer stateId) {
+        log.trace("Start find loans by stateId: {}", stateId);
+        return repository.findAll()
+                .filter(loanEntity -> loanEntity.getStateId().equals(stateId))
+                .map(entity -> mapper.map(entity, Loan.class))
+                .doOnError(e -> log.error("Error finding loans by stateId {}: {}", stateId, e.getMessage()));
     }
 
 }

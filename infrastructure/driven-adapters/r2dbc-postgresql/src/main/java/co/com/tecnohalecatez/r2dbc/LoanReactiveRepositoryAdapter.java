@@ -40,4 +40,13 @@ public class LoanReactiveRepositoryAdapter extends ReactiveAdapterOperations<Loa
                 .doOnError(e -> log.error("Error finding loans by stateId {}: {}", stateId, e.getMessage()));
     }
 
+    @Override
+    public Mono<Long> countByStateId(Integer stateId) {
+        log.trace("Start count loans by stateId: {}", stateId);
+        return repository.findAll()
+                .filter(loanEntity -> loanEntity.getStateId().equals(stateId))
+                .count()
+                .doOnError(e -> log.error("Error counting loans by stateId {}: {}", stateId, e.getMessage()));
+    }
+
 }

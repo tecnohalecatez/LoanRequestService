@@ -10,4 +10,6 @@ public interface LoanRepository {
 
     Flux<Loan> findByStateId(Integer stateId);
 
+    Mono<Long> countByStateId(Integer stateId);
+
 }

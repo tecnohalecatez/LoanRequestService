@@ -3,6 +3,7 @@ package co.com.tecnohalecatez.api;
 import co.com.tecnohalecatez.api.constant.LoanConstant;
 import co.com.tecnohalecatez.api.dto.LoanDTO;
 import co.com.tecnohalecatez.api.dto.LoanDataDTO;
+import co.com.tecnohalecatez.api.dto.PageResponseDTO;
 import co.com.tecnohalecatez.api.exception.LoanDataException;
 import co.com.tecnohalecatez.api.exception.LoanNotFoundException;
 import co.com.tecnohalecatez.api.mapper.LoanDTOMapper;
@@ -60,13 +61,37 @@ public class LoanHandler {
     }
 
     public Mono<ServerResponse> listenGetLoansPage(ServerRequest serverRequest) {
-        return loanUseCase.getLoansByStateId(1)
-                .map(loanDTOMapper::toResponse)
-                .collectList()
-                .flatMap(loanList -> ServerResponse.ok()
+        int page = serverRequest.queryParam("page")
+                .map(Integer::parseInt)
+                .orElse(0);
+        int size = serverRequest.queryParam("size")
+                .map(Integer::parseInt)
+                .orElse(10);
+
+        return loanUseCase.countLoansByStateId(1)
+                .flatMap(totalElements -> {
+                    if (totalElements == 0) {
+                        return Mono.error(new LoanNotFoundException(LoanConstant.LOAN_NOT_FOUND));
+                    }
+                    
+                    int totalPages = (int) Math.ceil((double) totalElements / size);
+                    
+                    return loanUseCase.getLoansByStateIdPaginated(1, page, size)
+                            .map(loanDTOMapper::toResponse)
+                            .collectList()
+                            .map(loanList -> new PageResponseDTO<>(
+                                    loanList,
+                                    page,
+                                    size,
+                                    totalElements,
+                                    totalPages,
+                                    page == 0,
+                                    page >= totalPages - 1
+                            ));
+                })
+                .flatMap(pageResponse -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(loanList))
-                .switchIfEmpty(Mono.error(new LoanNotFoundException(LoanConstant.LOAN_NOT_FOUND)));
+                        .bodyValue(pageResponse));
     }
 
 }

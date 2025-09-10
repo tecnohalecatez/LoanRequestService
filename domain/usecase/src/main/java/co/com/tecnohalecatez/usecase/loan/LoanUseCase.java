@@ -19,8 +19,14 @@ public class LoanUseCase {
         return loanRepository.save(loan);
     }
 
-    public Flux<Loan> getLoansByStateId(Integer stateId) {
-        return loanRepository.findByStateId(stateId);
+    public Mono<Long> countLoansByStateId(Integer stateId) {
+        return loanRepository.countByStateId(stateId);
+    }
+
+    public Flux<Loan> getLoansByStateIdPaginated(Integer stateId, int page, int size) {
+        return loanRepository.findByStateId(stateId)
+                .skip((long) page * size)
+                .take(size);
     }
 
 }

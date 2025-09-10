@@ -73,9 +73,7 @@ public class LoanHandler {
                     if (totalElements == 0) {
                         return Mono.error(new LoanNotFoundException(LoanConstant.LOAN_NOT_FOUND));
                     }
-                    
                     int totalPages = (int) Math.ceil((double) totalElements / size);
-                    
                     return loanUseCase.getLoansByStateIdPaginated(1, page, size)
                             .map(loanDTOMapper::toResponse)
                             .collectList()

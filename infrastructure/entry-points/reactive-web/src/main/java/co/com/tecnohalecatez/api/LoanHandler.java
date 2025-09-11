@@ -3,7 +3,9 @@ package co.com.tecnohalecatez.api;
 import co.com.tecnohalecatez.api.constant.LoanConstant;
 import co.com.tecnohalecatez.api.dto.LoanDTO;
 import co.com.tecnohalecatez.api.dto.LoanDataDTO;
+import co.com.tecnohalecatez.api.dto.PageResponseDTO;
 import co.com.tecnohalecatez.api.exception.LoanDataException;
+import co.com.tecnohalecatez.api.exception.LoanNotFoundException;
 import co.com.tecnohalecatez.api.mapper.LoanDTOMapper;
 import co.com.tecnohalecatez.usecase.loan.LoanUseCase;
 import co.com.tecnohalecatez.usecase.type.TypeUseCase;
@@ -56,6 +58,38 @@ public class LoanHandler {
                 .flatMap(savedLoan -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(loanDTOMapper.toResponse(savedLoan)));
+    }
+
+    public Mono<ServerResponse> listenGetLoansPage(ServerRequest serverRequest) {
+        int page = serverRequest.queryParam("page")
+                .map(Integer::parseInt)
+                .orElse(0);
+        int size = serverRequest.queryParam("size")
+                .map(Integer::parseInt)
+                .orElse(10);
+
+        return loanUseCase.countLoansByStateId(1)
+                .flatMap(totalElements -> {
+                    if (totalElements == 0) {
+                        return Mono.error(new LoanNotFoundException(LoanConstant.LOAN_NOT_FOUND));
+                    }
+                    int totalPages = (int) Math.ceil((double) totalElements / size);
+                    return loanUseCase.getLoansByStateIdPaginated(1, page, size)
+                            .map(loanDTOMapper::toResponse)
+                            .collectList()
+                            .map(loanList -> new PageResponseDTO<>(
+                                    loanList,
+                                    page,
+                                    size,
+                                    totalElements,
+                                    totalPages,
+                                    page == 0,
+                                    page >= totalPages - 1
+                            ));
+                })
+                .flatMap(pageResponse -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(pageResponse));
     }
 
 }

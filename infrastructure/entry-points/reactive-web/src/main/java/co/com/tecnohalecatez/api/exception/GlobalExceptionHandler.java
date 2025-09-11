@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,21 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         ErrorResponseDTO errorResponse;
-        int statusCode = 500;
-        String error = "Internal Server";
-        if (ex instanceof LoanDataException) {
-            statusCode = 400;
-            error = "Bad Request";
+        int statusCode;
+        String error;
+        switch (ex) {
+            case LoanDataException loanDataException -> {
+                statusCode = HttpStatus.BAD_REQUEST.value();
+                error = HttpStatus.BAD_REQUEST.getReasonPhrase();
+            }
+            case LoanNotFoundException loanNotFoundException -> {
+                statusCode = HttpStatus.NOT_FOUND.value();
+                error = HttpStatus.NOT_FOUND.getReasonPhrase();
+            }
+            default -> {
+                statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+                error = HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase();
+            }
         }
         errorResponse = new ErrorResponseDTO(
                 Instant.now().toString(),
